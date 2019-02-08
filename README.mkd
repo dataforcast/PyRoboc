@@ -1,0 +1,447 @@
+<h1>1. Présentation</h1>
+
+Ce dépôt héberge l'implémentation, en Python, du jeux du labyrinthe, dans une version simpliste. <br>
+
+L'application est multi-tâche, supporte la stack TCP/IP, s'exécute en mode client/serveur.<br>
+
+Elle supporte une interface en lignes de commande. <br>
+Elle est multi-joueurs, peut se jouer en réseau, ou en mode stand-alone.<br>
+En mode multi-joueurs, ces derniers peuvent s'échanger des messages par le biais d'un protocole de communication développé à cet effet sur la stack TCP/IP.
+
+<br>
+L'application a ete developpee sous Ubuntu/Linux en Python 3.5.2.<br>
+Ladite application, *roboc*, de par ses options de lancement, permet de lancer le serveur ou un client pour 
+l'interaction avec le joueur.<br>
+
+<br>
+
+<h1>2. Les fonctionnalites etendues du jeu </h1>
+<br>
+L'application permet de : 
+
+
+   * Jouer avec les symboles par defaut (X,x)
+   * Choisir un symbole pour son robot
+   * Tchater avec un autre joueur
+   * Arreter le serveur 
+   * Ajouter une sortie sur la carte
+   * Forcer la victoire (utilisé pour les tests)
+
+   Voir les details ci-dessous.
+<br>
+
+<h1> 3. Les tests unitaires</h1>
+  
+   >NB : Il est préférable de lancer une console avec les plus grandes largeur et hauteur possibles.
+   
+   
+   Utiliser les dimensions par defaut de la console Windows provoquera un affichage erratique.
+   En effet, l'entrelacement de l'affichage des cartes et des notifications conduira a un affichage 
+   difficile a interpréter.
+  
+## 3.1 A la racine du projet: 
+
+   * 18 tests unitaires, passés avec succès, valident le fonctionnement de l'application en mode client/serveur.
+   
+   * Le port du serveur etant choisie aleatoirement, entre les valeurs de l'interval [1031,65534], les tests peuvent être lancés sucessivement plusieurs fois de suite.
+
+   
+   0. Pour passer l'ensemble des tests :
+      <pre><code>python -m unittest</code></pre>
+
+## 3.2 Commandes de lancement des tests      
+   Pour passer les tests des modules séparément:<br>
+   
+   1. Test de la classe `Protocol` : <br>
+      <pre><code>python -m unittest test.util.test_Protocol</code></pre>
+
+      5 tests unitaires sont déroulés.
+      Il faut attendre quelques secondes pour l'affichage des résultats.
+      
+   2. La classe <code>Carte</code>
+       <pre><code>python -m unittest test.core.test_Carte</code></pre>
+      3 tests unitaires sont déroulés.
+      
+   3. La classe <code>RobotController</code>
+      <pre><code>python -m unittest test.core.test_RobotController</code></pre>
+      <br>
+      10 tests unitaires sont deroules.<br>
+      Pour l'un de ces tests, 10 robots sont deployés sur une carte avec des symboles différentiants.<br>
+      Chacun d'eux execute une serie de commandes de deplacement et d'action (poser porte et mur).<br>
+      
+      La carte ci-dessous presente un des etats de ce test avec 10 robots, certains d'entre eux 
+      entourés par un mur.<br>
+
+
+            0  OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+            1  O       O=O O:O       2O         O      O <-- Symboles '=',':','2'
+            2  O        O   O        O         O@O     O <-- Symbole '@'
+            3  O                                O      O
+            4  O           O                           O
+            5  O          01O                          O <-- Symbole '1'
+            6  O           O                           O
+            7  O                                       O
+            8  O                                       O
+            9  O                                       O
+            10 O               O                       O
+            11 O               4O                      O <-- Symbole '4'
+            12 O               O                       O
+            13 O   O                 O                 O
+            14 O  OAO     O         O#O                O <-- Symboles 'A' et '#'
+            15 O   O      3O         O                 O <-- Symbole '3'
+            16 O          O              O             O
+            17 O                        O!O            O <-- Symbole '!'
+            18 O                         O             O
+            19 OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+             |||||5||||||||5||||||||5||||||||5|||||||
+
+
+      La trace suivante, à la fin du test, le valide : <br>
+      <code>
+      *** INFO : Arret du serveur. Patientez... ***   <br>
+      *** INFO : (8.2) oRobotController[0]._state= end<br>
+      *** INFO : (8.2) oRobotController[1]._state= end<br>
+      *** INFO : (8.2) oRobotController[2]._state= end<br>
+      *** INFO : (8.2) oRobotController[3]._state= end<br>
+      *** INFO : (8.2) oRobotController[4]._state= end<br>
+      *** INFO : (8.2) oRobotController[5]._state= end<br>
+      *** INFO : (8.2) oRobotController[6]._state= end<br>
+      *** INFO : (8.2) oRobotController[7]._state= end<br>
+      *** INFO : (8.2) oRobotController[8]._state= end<br>
+      *** INFO : (8.2) oRobotController[9]._state= end<br>
+      *** INFO : (8.3) oRobotController._state= end<br>
+      </code>
+</hr>
+
+# 4. Commandes 
+## 4.1 Les commandes du jeux: 
+
+<br>
+<p>
+   <pre><code>python roboc.py -h</code></pre>
+</p>   
+
+   <pre><code>usage: roboc [-h] [-s] [-w PASSWD] [-H HOST] [-P PORT] [-c] [-g] [-n N] [-r R]
+                [-a] [-p] [-d] [-t]
+
+   *** Jeu du labyrinthe Version 2.0 ***
+
+       optional arguments :
+       
+        -h, --help                  displays this help message and exit
+        -s, --server                Activer le serveur
+        -w PASSWD, --passwd PASSWD  Mot de passe du serveur (roboc par defaut)
+        -H HOST, --host HOST        Adresse IP du serveur
+        -P PORT, --port PORT        Port reseau du serveur
+        -c, --client                Mode joueur
+        -g, --graphique             Interface graphique
+        -n N                        Nombre de joueur(s), 1 par defaut
+        -r R                        Symbole du robot pour le joueur
+        -a, --auto                  Demarrage du jeu en mode automatique
+        -p, --premier               Mode premier : jouer avec la 1ere version du robot
+        -d, --debug                 Option de debug
+        -t, --track                 Option de tracking des appels de fonctions
+
+</code></pre>
+
+
+## 4.2 Lancement du jeux
+
+        1. En cas de victoire
+        Une fois la partie gagnée, le joueur est notifié et deconnecté du serveur.
+   
+        2. En mode serveur pour N joueurs:
+        python roboc.py -s -n N
+        Ou N est le nombre de joueurs. Par defaut, ce nombre est 1.
+      
+        3. En mode client:
+        Il est donné la possibilité au joueur de choisir son symbole de robot.
+        De cette façon, il lui est possible de tchater avec un joueur qui aura fait de même.
+        
+        4. Lancement du client avec l'adresse réseau par défaut:
+        python roboc.py -c
+        
+        Dans ce mode, lorsque le client est connecté au serveur, il faut envoyer la commande C pour démarrer le jeux. 
+        L'adresse réseau par défaut est définie dans la classe TCPConnection.
+        Sa valeur est :  (IP, Port) = (127.0.0.1,2000)
+
+        5. Lancement serveur avec l'adresse réseau par defaut:
+        L'adresse par defaut est alors (127.0.0.1,2000)
+
+        python roboc.py -s 
+        
+        Il convient alors de lancer le joueur avec les options minimum :
+        
+        python roboc.py -c 
+        
+        6. Mode automatique et mode manuel
+
+        En mode manuel, une fois le client connecte au serveur, il faut entrer la commande C pour 
+        demarrer le jeu.
+        
+        En mode automatique, la commande C est automatiquement envoyee au serveur une fois la connexion etablie.
+        
+        7. Représentation des robots
+        
+        En mode manuel, les robots sont representes sur la carte avec le symbole x pour les robots d'autrui, avec le symbole X pour les robots de chacun des joueurs.
+        
+        En mode automatique, les robots sont representes sur la carte avec le symbole choisi par les joueurs.
+        
+        Pour choisir son symbole de robot, en mode client, le joueur doit utiliser l'option -r 
+        au lancement de l'application.
+        
+        8. Symbole par defaut du robot
+
+        C'est l'option par defaut si l'option -r n'est pas activee.
+        L'application se charge de choisir un symbole different pour chaque joueur.
+        
+        Le robot du joueur sera affiche avec le symbole X sur la carte.
+        
+        Le prompt, A:) sera affiche avec le symbole choisie par le jeu, A, ici pour l'exemple.
+        
+         0  OOOOOOOOOO
+         1  O O    O O
+         2  O . OO  xO <-- Symbole du robot d'un autre joueur.
+         3  O O .  X O <-- Symbole du robot du joueur
+         4  O OOOO O.O
+         5  O O O    U
+         6  O OOOOOO.O
+         7  O O      O
+         8  O O OOOOOO
+         9  O . O    O
+         10 OOOOOOOOOO 
+            |||||5||||
+
+         1 :-) Continuez...
+         ^
+         |
+         +----- Representation du robot sur le serveur, choisie par le serveur.
+         
+         Sur le  serveur, les symboles des robots s'affichent avec leur valeurs (1 et 2):
+         
+         OOOOOOOOOO
+         O O    O O
+         O . OO  2O <-- Symbole 2
+         O O .  1 O <-- Symbole 1
+         O OOOO O.O
+         O O O    U
+         O OOOOOO.O
+         O O      O
+         O O OOOOOO
+         O . O    O
+         OOOOOOOOOO 
+
+        
+        9. Pour choisir un symbole pour le robot en mode manuel
+        Pour choisir un symbole pour le robot, ici, @ pour l'exemple, en mode manuel :
+
+        python roboc.py -c -r @
+
+         Dans ce mode, lorsque les clients se sont connectés, le joueur doit envoyer la commande C pour démarrer le jeu.
+
+         Le robot du joueur sera affiche avec le symbole X sur la carte.
+         
+         Le prompt, @:) rappel au joueur le symbole qu'il a choisie pour son robot.
+
+         OOOOOOOOOO
+         O O    O O
+         O . OO   O 
+         O O .    O 
+         O OOOO O.O
+         O O O    U
+         O OOOOOO.O
+         O O  X   O <-- Symbole du robot
+         O O OOOOOO
+         O . O    O
+         OOOOOOOOOO 
+
+         @ :-) Entrez C pour commencer la partie : 
+         ^
+         |
+         +--- Symbole du robot du joueur 
+
+
+        10. Pour afficher un symbole choisie pour le robot
+        L'option -a est utilisée.
+
+        python roboc.py -c -r @ -a
+
+        Dans ce mode, l'application du joueur se charge d'envoyer la commande C pour démarrer le jeu, une 
+        fois la connection TCP avec le serveur établie.
+        
+        Le robot sera affiche avec ce symbole sur la carte.
+        Le prompt, @:) sera affiche avec le symbole choisie par le joueur.
+      
+         0  OOOOOOOOOO
+         1  O O    O O
+         2  O . OO   O
+         3  O O O    O
+         4  O OOOO O.O
+         5  O O O    U
+         6  O OOOOOO.O
+         7  O O  @   O <-- Symbole du robot
+         8  O O OOOOOO
+         9  O . O    O
+         10 OOOOOOOOOO 
+            |||||5||||
+
+         @ :-) Entrez le deplacement ou l'action (Q pour quitter le jeu, H pour l'aide) :
+         ^
+         |
+         +--- Symbole du robot du joueur 
+
+
+
+    11. Arrêter le serveur en tant que client :
+
+      * Entrer la commande :  0
+      * Entrer le mot de passe : roboc
+         
+    12. Deroulement du jeux en mode client 
+
+      Un prompt rappel le symbole du joueur :
+      @ :-)
+      Le joueur a ici le symbole @
+      Les commandes disponibles sont affichees par l'aide en ligne, disponible en entrant h ou H.
+
+
+      @ :-) Entrez le deplacement ou l'action (Q pour quitter le jeu, H pour l'aide) : h
+
+
+       Deplacements sur la carte: 
+         1 pas a Gauche --------> O 
+         n pas a Gauche --------> On
+         1 pas a Droite --------> E 
+         n pas a Droite --------> En
+         1 pas vers le Haut ----> N 
+         n pas vers le Haut ----> Nn
+         1 pas vers le Bas -----> S 
+         n pas vers le Bas -----> Sn
+         Monter 1 marche -------> U 
+         Monter n marches ------> Un 
+         Descendre 1 marche ----> D  
+         Descendre n marches ---> Dn 
+
+       Actions sur la carte: 
+         Murer au nord----------> mn ou Mn/mN/MN
+         Murer au sud ----------> ms ou Ms/mS/MS
+         Murer a l'est----------> me ou Me/mE/ME
+         Murer a l'ouest -------> mo ou Mo/mO/MO
+         Porte au nord ---------> pn ou Pn/pN/PN
+         Porte au sud  ---------> ps ou Ps/pS/PS
+         Porte a l'est ---------> pe ou Pe/pE/PE
+         Porte a l'ouest -------> po ou Po/pO/PO
+         Sortie au sud ---------> xs ou Xs/xS/XS
+
+       Controle du jeu: 
+         Demarrer le jeu -------> c ou C 
+         Tchater avec un robot -> t <symbol du robot> <message>
+         Tchater avec un robot -> T <symbol du robot> <message>
+         Quitter le jeu  -------> Q ou q
+         Rafraichir la carte ---> ?
+         Arreter du serveur ----> 0 le mot de passe sere demande
+         Forcer la victoire ----> u ou U pour unittest; le mot de passe sere demande
+
+
+   
+    13. Tchater avec un autre joueur 
+      Un joueur A tchate avec un joueur B
+      
+      A :-) t B Que le meilleur gagne!
+      ^
+      |
+      +-- Rappel le symbole du joueur 
+         
+         
+         
+      La console du joueur B :
+      B :-) Message de : A> Que le meilleur gagne!
+      ^                  ^
+      |                  |
+      |                  +-- Symbole de l'expéditeur
+      |
+      +-- Le symbole du joueur qui reçoit le tchat
+
+    13. Forcer la victoire
+      
+      Entrer la commande W (ou w)
+      Saisir le mot de passe, roboc par defaut.
+      Cette fonctionnalite est utilisee pour des raisons de test.
+
+
+# 5. Debug 
+   
+    1. Pour tracer les appels des fonctions du serveur :
+
+          python roboc.py -s -t
+    
+          Le fichier des traces se trouve dans le fichier log/server_calltrack_sorted.txt
+          Les logs des appels a l'entrée et a la sortie de chque appel sont tracés par temps croissant 
+       
+   
+    2. Pour tracer les appels des fonctions du client :
+
+          python roboc.py -c -t
+    
+          Le fichier des traces se trouve dans le fichier log/client_calltrack_sorted.txt
+          Les logs des appels a l'entrée et a la sortie de chaque appel sont tracés par temps croissant 
+    
+
+    3. Pour afficher des traces dans la console, activer l'option -d côté serveur ou client.
+        python roboc.py -c -d
+        python roboc.py -s -d
+   
+# 6. Lancer le jeu en mode premier 
+
+        1. Pour lancer le jeux du labyrinthe dans sa première version :
+
+            python roboc -p                
+    
+           NB : cette version supporte les actions de murage et perçage.
+            
+            
+# 7. Pour développer de nouvelles commandes :
+
+       A titre d'exemple, cette version supporte le perçage d'une sortie (U).
+       A tester avec la carte "Cage" proposée dans le jeux au lancement du serveur.
+       
+        1. Modifier tout ou parties des expressions régulières dans la classe Protocol:
+        
+        Protocol.REGEXP_PLAYMOOVE  pour les déplacements 
+        Protocol.REGEXP_PLAYACTION pour les actions du jeux autre que des déplacements sur la carte.
+        Protocol.REGEXP_CTRLCMD    pour les commandes de controle, i.e les commandes qui ne sont pas liées a une partie, comme tchater, rafraĉhir la carte...
+                                 
+        2. Formater les commandes
+        Formater les nouvelles commandes dans la méthode Protocol._format 
+        Les commandes formatées sont des tuples de la forme ('A',<Command>,'B')
+        'A' est le symbole du robot du joueur 
+        'B' est un autre symbole qui dépend de la commande (un autre joueur, le labyrinthe)
+        
+
+        3. Vérifier la commande 
+
+        Toutes les commandes sont vérifiées une fois reçues, avant leur traitement.
+        Cette vérificcation est implémentée dans la méthode Protocol._formatCheck
+        
+        4. Modifier le contenu (la payload) des réponses
+        
+           La modification intervient en ajoutant un champ 'cle:valeur' dans la variable replyPayload 
+           définie dans les méthodes suivantes :
+           * LabyrinthServer.sendMessageScheduledGamer
+           * LabyrinthServer.sendMessageOtherGamer
+           * LabyrinthServer.sendMessageGamerTurnStatus
+        
+
+        5. Implémenter le traitement du contenu (la payload) d'un message
+        
+           Les traitements sont réalisés dans les méthodes :
+           * RobotController.payloadProcess côté joueur; c'est le traitement des commandes reçus ar le serveur de jeux.
+           * LabyrinthServer.payloadProcess côté serveur; c'est le traitement des commandes de jeux reçus les joueurs.
+           * LabyrinthServer.payloadProcessCtrl côté serveur; c'est le traitement des commandes de contrôle reçus les joueurs.
+        
+        6. Developper de nouvelles regles de jeu 
+
+          L'ensemble des regles est implemente dans deux classes :
+          * Labyrinth 
+          * Carte
+    
